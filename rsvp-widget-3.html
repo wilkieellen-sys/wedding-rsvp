@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RSVP — Colin & Ellen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prata&family=Mrs+Saint+Delafield&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream: #F8F5EC;
+    --ink: #3C3A46;
+    --steel: #4B6A82;
+    --sage: #8FA79D;
+    --sage-deep: #5E7A70;
+    --pink-deep: #C98FA0;
+    --green-check: #839E77;
+    --line: rgba(75,106,130,0.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{ margin:0; background:transparent; }
+  body{
+    font-family:'Space Mono', monospace;
+    color:var(--ink);
+    line-height:1.6;
+    padding:1.6rem 1rem;
+  }
+  .hidden{ display:none !important; }
+  h2{ font-family:'Prata', serif; font-weight:400; margin:0; color:var(--steel); text-align:center; font-size:2rem; }
+  .lead{ text-align:center; font-size:0.85rem; max-width:420px; margin:0.8rem auto 0; }
+  .script{ font-family:'Mrs Saint Delafield', cursive; }
+
+  .rsvp-wrap{ max-width:520px; margin:0 auto; }
+  .rsvp-card{ text-align:left; margin-top:1.8rem; }
+  .rsvp-search{ display:flex; gap:0.6rem; flex-wrap:wrap; justify-content:center; }
+  .rsvp-search input{
+    flex:1; min-width:200px; padding:0.85rem 1rem; border-radius:2px;
+    border:1px solid var(--line); font-size:0.95rem; font-family:inherit; background:#fff;
+  }
+  .field-label{ font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--steel); display:block; margin-bottom:0.4rem;}
+  .party-match{
+    text-align:left; width:100%; padding:1rem 1.2rem; margin-top:0.7rem;
+    border:1px solid var(--line); border-radius:2px; background:#fff; cursor:pointer;
+    display:flex; justify-content:space-between; align-items:center; gap:1rem;
+  }
+  .party-match:hover, .party-match:focus-visible{ border-color:var(--steel); }
+  .party-match .pname{ font-family:'Prata', serif; font-size:1.05rem; color:var(--steel); }
+
+  .rsvp-guest-row{
+    border-top:1px dotted var(--line); padding:1.3rem 0; display:flex; flex-direction:column; gap:0.9rem;
+  }
+  .rsvp-guest-row:first-of-type{ border-top:none; }
+  .guest-name-line{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; }
+  .guest-name-line strong{ font-family:'Prata', serif; font-size:1.1rem; font-weight:400; color:var(--steel); }
+  .attend-toggle{ display:flex; gap:0.5rem; }
+  .attend-toggle button{
+    padding:0.5rem 1rem; border-radius:2px; border:1px solid var(--line);
+    background:#fff; cursor:pointer; font-size:0.76rem; font-family:inherit;
+  }
+  .attend-toggle button.active.yes{ background:var(--green-check); border-color:var(--green-check); color:#fff; }
+  .attend-toggle button.active.no{ background:var(--pink-deep); border-color:var(--pink-deep); color:#fff; }
+  .extra-fields{ display:grid; grid-template-columns:1fr; gap:0.8rem; }
+  .extra-fields input, textarea{
+    width:100%; padding:0.7rem 0.85rem; border-radius:2px; border:1px solid var(--line);
+    font-family:inherit; font-size:0.86rem; background:#fff;
+  }
+  textarea{ min-height:70px; resize:vertical; }
+  .invite-badge{
+    display:inline-block; margin:0.4rem 0 1rem; font-size:0.66rem; text-transform:uppercase;
+    letter-spacing:0.08em; padding:0.35rem 0.7rem; border-radius:2px; font-weight:700;
+  }
+  .invite-badge.full{ background:rgba(75,106,130,0.14); color:var(--steel); }
+  .invite-badge.party{ background:rgba(201,143,160,0.18); color:var(--pink-deep); }
+  .rsvp-msg{ margin-top:1.3rem; }
+  .rsvp-actions{ margin-top:1.5rem; display:flex; gap:0.8rem; align-items:center; flex-wrap:wrap; }
+  .status-note{ font-size:0.8rem; }
+  .back-link{ background:none; border:none; text-decoration:underline; text-underline-offset:3px; cursor:pointer; color:var(--steel); font-size:0.8rem; padding:0; font-family:inherit; }
+
+  .btn-solid{
+    display:inline-block; padding:0.85rem 1.8rem; border:none; background:var(--steel);
+    color:var(--cream); text-decoration:none; font-size:0.75rem; letter-spacing:0.1em; text-transform:uppercase;
+    cursor:pointer; transition:background .2s ease; font-family:inherit;
+  }
+  .btn-solid:hover, .btn-solid:focus-visible{ background:var(--sage-deep); }
+  a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible{
+    outline:2px solid var(--steel); outline-offset:2px;
+  }
+  .config-warning{
+    max-width:480px; margin:0 auto; padding:1.2rem 1.4rem; border:1px dashed var(--pink-deep);
+    background:#fff; font-size:0.82rem; color:var(--ink);
+  }
+  .loading-note{ text-align:center; color:var(--steel); font-size:0.85rem; padding:1rem; }
+</style>
+</head>
+<body>
+
+<div class="rsvp-wrap">
+  <h2>RSVP</h2>
+  <p class="lead">Let us know whether you can make it — by 1 February 2027 if you can.</p>
+
+  <div class="rsvp-card">
+    <div id="configWarning" class="config-warning hidden">
+      This widget isn't connected to a Google Sheet yet — set <code>SCRIPT_URL</code>
+      near the top of the script to your deployed Apps Script web app URL.
+    </div>
+
+    <div id="rsvpSearchStep">
+      <label class="field-label" for="rsvpSearchInput">Search for your name or party</label>
+      <div class="rsvp-search">
+        <input type="text" id="rsvpSearchInput" placeholder="e.g. Smith, or Jamie">
+      </div>
+      <div id="rsvpMatches"></div>
+      <div id="rsvpNoMatch" class="hidden" style="margin-top:1rem;">
+        <p class="status-note" style="color:var(--pink-deep);">We couldn't find that name — try a surname, or get in touch with us directly.</p>
+      </div>
+    </div>
+
+    <div id="rsvpFormStep" class="hidden">
+      <button class="back-link" id="rsvpBack">← Search again</button>
+      <div id="rsvpFormContent"></div>
+    </div>
+  </div>
+  <p class="script" style="text-align:center;margin-top:2rem;font-size:1.4rem;color:var(--steel);">hope to see you there x</p>
+</div>
+
+<script>
+(function(){
+  // ============================================================
+  // PASTE your deployed Google Apps Script web app URL here:
+  const SCRIPT_URL = 'PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
+  // ============================================================
+
+  let guestList = [];
+  let currentParty = null;
+  let currentDraft = null;
+  const configured = SCRIPT_URL.indexOf('PASTE_') !== 0;
+
+  function escapeHtml(str){
+    const d = document.createElement('div'); d.textContent = str; return d.innerHTML;
+  }
+
+  async function fetchGuestList(){
+    if(!configured) return [];
+    try{
+      const res = await fetch(SCRIPT_URL + '?action=guestlist');
+      return await res.json();
+    }catch(e){ console.error('guestlist fetch failed', e); return []; }
+  }
+
+  async function fetchRsvp(partyId){
+    if(!configured) return null;
+    try{
+      const res = await fetch(SCRIPT_URL + '?action=getrsvp&partyId=' + encodeURIComponent(partyId));
+      const data = await res.json();
+      return (data && data.guests && data.guests.length) ? data : null;
+    }catch(e){ console.error('rsvp fetch failed', e); return null; }
+  }
+
+  async function submitRsvp(payload){
+    if(!configured) return false;
+    try{
+      // text/plain avoids a CORS preflight that Apps Script doesn't handle well
+      const res = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      return !!data.success;
+    }catch(e){ console.error('rsvp submit failed', e); return false; }
+  }
+
+  async function loadData(){
+    if(!configured){
+      document.getElementById('configWarning').classList.remove('hidden');
+      return;
+    }
+    guestList = await fetchGuestList();
+  }
+
+  const searchInput = document.getElementById('rsvpSearchInput');
+  const matchesDiv = document.getElementById('rsvpMatches');
+  const noMatchDiv = document.getElementById('rsvpNoMatch');
+
+  searchInput.addEventListener('input', ()=>{
+    const q = searchInput.value.trim().toLowerCase();
+    matchesDiv.innerHTML = '';
+    noMatchDiv.classList.add('hidden');
+    if(q.length < 2) return;
+    const matches = guestList.filter(p=>{
+      if(p.partyName.toLowerCase().includes(q)) return true;
+      return p.guests.some(g=> g.name.toLowerCase().includes(q));
+    });
+    if(matches.length === 0){ noMatchDiv.classList.remove('hidden'); return; }
+    matches.forEach(p=>{
+      const btn = document.createElement('button');
+      btn.className = 'party-match';
+      btn.innerHTML = `<span class="pname">${escapeHtml(p.partyName)}</span><span>→</span>`;
+      btn.addEventListener('click', ()=> openParty(p.id));
+      matchesDiv.appendChild(btn);
+    });
+  });
+
+  async function openParty(partyId){
+    const party = guestList.find(p=>p.id === partyId);
+    if(!party) return;
+    currentParty = party;
+
+    document.getElementById('rsvpSearchStep').classList.add('hidden');
+    document.getElementById('rsvpFormStep').classList.remove('hidden');
+    document.getElementById('rsvpFormContent').innerHTML = '<p class="loading-note">Loading your invite…</p>';
+
+    const existing = await fetchRsvp(partyId);
+    currentDraft = existing || {
+      guests: party.guests.map(g=>({ name:g.name, attending:null, dietary:'', song:'' })),
+      notes:''
+    };
+    currentDraft.guests = party.guests.map(g=>{
+      const prev = currentDraft.guests.find(x=>x.name === g.name);
+      return prev || { name:g.name, attending:null, dietary:'', song:'' };
+    });
+
+    renderPartyForm();
+  }
+
+  function renderPartyForm(){
+    const el = document.getElementById('rsvpFormContent');
+    const badgeClass = currentParty.inviteType === 'full' ? 'full' : 'party';
+    const badgeText = currentParty.inviteType === 'full'
+      ? "Invited to: Ceremony, Wedding Breakfast & Evening Party"
+      : "Invited to: Evening Party";
+
+    let guestsHtml = currentDraft.guests.map((g, i)=>{
+      const yesActive = g.attending === true ? 'active yes' : '';
+      const noActive = g.attending === false ? 'active no' : '';
+      const showExtras = g.attending === true;
+      return `
+      <div class="rsvp-guest-row" data-idx="${i}">
+        <div class="guest-name-line">
+          <strong>${escapeHtml(g.name)}</strong>
+          <div class="attend-toggle">
+            <button type="button" class="att-yes ${yesActive}">Attending</button>
+            <button type="button" class="att-no ${noActive}">Can't make it</button>
+          </div>
+        </div>
+        <div class="extra-fields ${showExtras ? '' : 'hidden'}" data-extras>
+          <div>
+            <label class="field-label">Dietary requirements or allergies (optional)</label>
+            <input type="text" class="dietary-input" value="${escapeHtml(g.dietary||'')}" placeholder="e.g. vegetarian, nut allergy">
+          </div>
+          <div>
+            <label class="field-label">One song that'll get you on the dance floor (optional)</label>
+            <input type="text" class="song-input" value="${escapeHtml(g.song||'')}" placeholder="ABBA? One Direction? We don't judge.">
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    el.innerHTML = `
+      <h3 style="font-family:'Prata',serif;font-size:1.3rem;margin-top:0.6rem;color:var(--steel);font-weight:400;">${escapeHtml(currentParty.partyName)}</h3>
+      <span class="invite-badge ${badgeClass}">${badgeText}</span>
+      ${guestsHtml}
+      <div class="rsvp-msg">
+        <label class="field-label" for="rsvpNotes">Anything else you'd like us to know?</label>
+        <textarea id="rsvpNotes" placeholder="Well wishes, questions…">${escapeHtml(currentDraft.notes||'')}</textarea>
+      </div>
+      <div class="rsvp-actions">
+        <button class="btn-solid" id="submitRsvpBtn">Submit RSVP</button>
+        <span class="status-note hidden" id="rsvpSavedNote">Saved — thank you!</span>
+      </div>
+    `;
+
+    el.querySelectorAll('.rsvp-guest-row').forEach(row=>{
+      const idx = +row.dataset.idx;
+      const extras = row.querySelector('[data-extras]');
+      row.querySelector('.att-yes').addEventListener('click', ()=>{
+        currentDraft.guests[idx].attending = true;
+        row.querySelector('.att-yes').classList.add('active','yes');
+        row.querySelector('.att-no').classList.remove('active','no');
+        extras.classList.remove('hidden');
+      });
+      row.querySelector('.att-no').addEventListener('click', ()=>{
+        currentDraft.guests[idx].attending = false;
+        row.querySelector('.att-no').classList.add('active','no');
+        row.querySelector('.att-yes').classList.remove('active','yes');
+        extras.classList.add('hidden');
+      });
+      const dietInput = row.querySelector('.dietary-input');
+      if(dietInput) dietInput.addEventListener('input', ()=> currentDraft.guests[idx].dietary = dietInput.value);
+      const songInput = row.querySelector('.song-input');
+      if(songInput) songInput.addEventListener('input', ()=> currentDraft.guests[idx].song = songInput.value);
+    });
+
+    document.getElementById('rsvpNotes').addEventListener('input', (e)=> currentDraft.notes = e.target.value);
+
+    document.getElementById('submitRsvpBtn').addEventListener('click', async ()=>{
+      const btn = document.getElementById('submitRsvpBtn');
+      btn.disabled = true; btn.textContent = 'Saving…';
+      const ok = await submitRsvp({
+        action: 'submit',
+        partyId: currentParty.id,
+        partyName: currentParty.partyName,
+        guests: currentDraft.guests,
+        notes: currentDraft.notes
+      });
+      btn.disabled = false; btn.textContent = 'Submit RSVP';
+      const note = document.getElementById('rsvpSavedNote');
+      if(ok){
+        note.textContent = 'Saved — thank you!';
+        note.style.color = 'var(--green-check)';
+      } else {
+        note.textContent = 'Something went wrong saving — please try again.';
+        note.style.color = 'var(--pink-deep)';
+      }
+      note.classList.remove('hidden');
+      setTimeout(()=> note.classList.add('hidden'), 4000);
+    });
+  }
+
+  document.getElementById('rsvpBack').addEventListener('click', ()=>{
+    document.getElementById('rsvpFormStep').classList.add('hidden');
+    document.getElementById('rsvpSearchStep').classList.remove('hidden');
+    currentParty = null;
+    searchInput.value = '';
+    matchesDiv.innerHTML = '';
+  });
+
+  loadData();
+})();
+</script>
+</body>
+</html>
